@@ -5,7 +5,8 @@ int main(args)
 {
 	while (!exit)
 	{
-		gameLogic();
+		moveAI();
+		renderView();
 	}
 	
 	return OK;
