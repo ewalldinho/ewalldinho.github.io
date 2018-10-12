@@ -7,11 +7,11 @@ int subtract(x, y) {
 }
 
 int multiply(x, y) {
-	return 0;
+	return x * y;
 }
 
 int divide(x, y) {
-	return 0;
+	return x / y;
 }
 
 int square(x) {
