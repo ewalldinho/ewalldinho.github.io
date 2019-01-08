@@ -13,3 +13,7 @@ villain * create_villain() {
   malloc(sizeof(villain), &v);
   return &v;
 }
+
+void act(void) {
+    // do nothing
+}
