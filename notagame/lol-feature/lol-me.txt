@@ -1,0 +1,3 @@
+lol feature
+-----------
+Adds lol creatures to the map.
