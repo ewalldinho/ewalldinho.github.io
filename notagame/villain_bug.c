@@ -16,5 +16,15 @@ void act(int * params) {
   {
     sum = sum * i;
   }
+ 
+}
+
+void buggy_meethod(void) {
+  int a = 0;
+  villain v = villain();
+  player p = player();
   
+  while (true)
+    attack(&p, &v);
+  attack(&v, &p);
 }
