@@ -1,59 +1,336 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
-	<meta charset="utf-8" />
-	<style type="text/css">
-body {
-    background-color: #3498db;
-    font-family: Arial;
-    color: white;
-    text-align: center; 
+<meta charset="utf-8" />
+<title>Ballroom</title>
+<style type="text/css">
+#xDiv {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 72px;
+  line-height: 100px;
+  font-family: Arial, sans-serif;
+  position: fixed;
+  border-radius: 50px;
 }
 
-ul {
-    list-style-type: none;
-    max-width: 300px;
-    margin-left: 20px auto;
+.ball {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 72px;
+  line-height: 100px;
+  font-family: Arial, sans-serif;
+  position: fixed;
+  border-radius: 50px;
+  border: solid 1px transparent;
 }
 
-li {
-    min-height: 20px;
-    text-align: left;
-    background-color: white;
-    color: #444;
-    padding: 5px;
-    margin-bottom: 5px;
+.ball:active {
+	border-color: #FF0000;
 }
 
-li button {
-    float: right;
-    margin: 0 3px;
+.context-menu {
+    z-index:1000;
+    position: absolute;
+    background-color:#C0C0C0;
+    border: 1px solid black;
+    padding: 2px;
+	background-color: snow;
+	border-radius: 5px;
+}
+.context-menu a {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	border: solid 1px #777;
+	cursor: pointer;
+	padding: 4px;
+	text-align: center;
+	color: #777;
+}
+.context-menu a:hover {
+	color: #333;
+	text-decoration: underline;
+	background-color: whitesmoke;
+}
+</style>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
+<script>
+var $ball = null;
+var timer = null;
+
+var speed = 0;
+var maxw = 0;
+var maxh = 0;
+
+function calcBounds() {
+	maxw = $(window).width() - $('#xDiv').outerWidth();
+	maxh = $(window).height() - $('#xDiv').outerWidth();
 }
 
-.checked {
-    text-decoration: line-through;
+function setMenuItemEnabled(itemId, enabled)
+{
+	if (enabled)
+		$(itemId).css('color', '#008800');
+	else 
+		$(itemId).css('color', '#cccccc');
 }
-	</style>
-    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script src="./js/simple_spa.js"></script>
+
+function changeSpeed(delta) {
+	speed += delta;
+	if (speed < 1) speed = 1;
+	if (speed > 100) speed = 100;
+	
+	$('#txtSpeed').text(speed);
+	if (speed === 1) setMenuItemEnabled('#itemSlower', false);
+	else setMenuItemEnabled('#itemSlower', true);;
+	if (speed === 100) setMenuItemEnabled('#itemFaster', false);
+	else setMenuItemEnabled('#itemFaster', true);
+}
+
+function move(div) {
+  $ball.css("left", x);
+  $ball.css("top", y);
+  x += dx * speed;
+  y += dy * speed;
+  if (x < 0 || x > maxw)
+    dx *= -1;
+  if (y < 0 || y > maxh)
+    dy *= -1;
+}
+function startLoop() {
+	console.log(maxw, maxh);
+	if (!bTimer) {
+		if (balls.length > 0)
+		{
+			bTimer = setInterval(loop, 24);
+		}
+		//$ball.show();
+		//timer = setInterval(function() {
+//			console.log("123 ");
+		//	move('#xDiv'); 
+		//}, 25);
+	}
+	else 
+		alert('Timer already running.' + timer);
+}
+function stopLoop() {
+	if (bTimer != null) {
+		clearInterval(bTimer);
+		bTimer = null;
+	}
+}
+
+function colorChange(e) {
+	//console.log(e);
+	//console.log(e.target.value);
+	////$ball.css("background-color", e.target.value);
+}
+function ballChanged(e) {
+	console.log(e);
+	var clr = $('#ddBalls option:selected').css('color');
+	console.log(clr);
+	console.log($('#ddBalls option:selected').css('background-color'));
+	$('#ddBalls').css('color', clr);
+}
+var Ball = function(ballId, ballColor) {
+
+console.log(ballId, ballColor);
+
+	this.bid = ballId;
+	this.color = ballColor;
+	this.ball = $('<div id="' + ballId + '" class="ball">O</div>').css({'background-color': ballColor}).appendTo($('body'));
+
+	this.x = 1;
+	this.y = 1;
+	this.w = 100;
+	this.h = 100;
+	this.dx = 1;
+	this.dy = 1;
+	
+	this.timer = null;
+	this.runway = 1000;
+	
+
+	console.log(this.bid, this.color);
+	console.log(this.x, this.y, this.dx, this.dy);
+	console.log(this.timer, this.runway);
+
+	//	var speed = 5;
+	
+	this.move = function() {
+		//console.log('move started: ', this.x, this.y);
+		
+		this.ball.css("left", this.x);
+		this.ball.css("top", this.y);
+	
+		this.x += this.dx * speed;
+		this.y += this.dy * speed;
+		if (this.x < 0 || this.x > maxw - this.w) {
+			this.dx *= -1;
+			if (this.x < 0) this.x = 0;
+			else if (this.x > maxw - this.w) this.x = maxw - this.w;
+		}
+		if (this.y < 0 || this.y > maxh - this.h) {
+			this.dy *= -1;
+			if (this.y < 0) this.y = 0;
+			else if (this.y > maxh - this.h) this.y = maxh - this.h;
+		}
+			
+		//this.runway -= speed;
+		//if (this.runway <= 0)
+		//	this.ball.hide();
+	};
+	
+	this.setColor = function(newColor) {
+		this.ball.css({'background-color' : newColor});
+	};
+	this.getTimer = function() {
+		return this.timer;
+	};
+	this.setTimer = function(newTimer) {
+		this.timer = newTimer;
+	};
+	
+	this.destroy = function() {
+		this.ball.remove();
+	};
+};
+
+var b = null;
+var balls = [];
+var bTimer = null;
+var loop = function() {
+	for (var bb in balls){
+		balls[bb].move();
+	}
+};
+function newBallCreation() {
+
+	if (!bTimer) {
+		bTimer = setInterval(loop, 24);
+	}
+
+	var idBase = 'ballDiv';
+	var genId = getNextId();
+	var ballId = idBase + genId;
+	b = new Ball(ballId, $("#ballColor").val());
+	b.setTimer(bTimer);
+	balls.push(b);
+	$("#ddBalls").append($("<option value='"+ ballId +"'>Ball #" + genId + "</option>").css('color', $('#ballColor').val()));
+}
+
+function destroyBall(){
+	//if (bTimer != null) {
+	//	clearInterval(bTimer);
+	//	bTimer = null;
+	//	b.destroy();
+	//	b = null;
+	//}
+	//else {
+	//	alert('nėra kamuolio');
+	//}
+	if (balls.length > 0) {
+		var bb = balls.pop();
+		console.log(bb);
+		
+		bb.setTimer(null); // vistiek nenaudojamas 
+		bb.destroy();
+		
+		$("#ddBalls option:selected").remove();
+		
+		if (balls.length == 0 && bTimer != null)
+		{
+			clearInterval(bTimer);
+			bTimer = null;
+		}
+	}
+	else {
+		alert("no more balls");
+	}
+}
+
+var getNextId = (function () {
+    var counter = 0;
+    return function () {return counter += 1;}
+})();
+
+$(function(){
+	calcBounds();
+
+	$("#btnStart").click(newBallCreation);
+	$("#btnStop").click(destroyBall);
+	
+	$(window).keypress(function(e) {
+		e.preventDefault();
+		console.log("Handler for .keypress() called. char code: " + e.charCode);
+		if (43 == e.charCode)
+			changeSpeed(1);
+		if (45 == e.charCode)
+			changeSpeed(-1)
+	});
+	$(window).resize(function() {
+		calcBounds();
+		if (x > maxw) x = maxw;
+		if (y > maxh) y = maxh;
+	});
+	
+	// context menu
+	$(document).bind("contextmenu", function(event) { 
+		event.preventDefault();
+		$("#ContextMenu").css({top: event.pageY + "px", left: event.pageX + "px", display: 'block'});
+	}).bind("click", function(event) {
+		$("#ContextMenu").hide();
+	});
+	$('#itemStart').click(function() {
+		startLoop();
+	});
+	$('#itemStop').click(function() {
+		stopLoop();
+	});
+	$('#itemFaster').click(function() {
+		changeSpeed(1);
+	});
+	$('#itemSlower').click(function() {
+		changeSpeed(-1);
+	});
+	
+	$("#ballColor").change(colorChange);
+	$("#ddBalls").change(ballChanged);
+	changeSpeed(5);
+});
+</script>
 </head>
 <body>
-    <div id="createListDiv">
-        <h1>Simple Shopping List</h1>
-        <input type="text" id="shoppingListName" placeholder="New List" />
-        <button onclick="createShoppingList();">Create</button>
-    </div>
+<p>
+	Speed: <span id="txtSpeed"></span> <br/>
+	Color: <input type="color" id="ballColor" value="#FF0000" onchange="colorChange" /><br/>
+	Balls: <select id="ddBalls"></select>
+	
+	<button id="btnStart">Add ball</button>
+	<button id="btnStop">Remove ball</button>
+</p>
 
-    <div id="shoppingListDiv" style="display: none;">
-        <h1 id="shoppingListTitle">New List</h1>
-        <input type="text" id="newItemName" placeholder="New Item" />
-        <button onclick="addItem()">Add</button>
-        <ul id="shoppingListItems">
-            <li>Salad <button>C</button><button>D</button></li>
-            <li>Milk <button>C</button><button>D</button></li>
-            <li>Tomatoes <button>C</button><button>D</button></li>
-        </ul>
-    </div>
+<script async>
+function myFunction() {
+    
+}
+</script>
+<script async>
+ //   setInterval(function(){ console.log("--- "); move('#yDiv'); }, 500);
+</script>
+
+<div id="ContextMenu" class='context-menu'>
+	<a id="itemStart">START</a>
+	<a id="itemStop">STOP</a>
+	<a id="itemFaster">Speed Up</a>
+	<a id="itemSlower">Slow Down</a>
+</div>
 </body>
 </html>

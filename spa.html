@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+	<style type="text/css">
+body {
+    background-color: #3498db;
+    font-family: Arial;
+    color: white;
+    text-align: center; 
+}
+
+ul {
+    list-style-type: none;
+    max-width: 300px;
+    margin-left: 20px auto;
+}
+
+li {
+    min-height: 20px;
+    text-align: left;
+    background-color: white;
+    color: #444;
+    padding: 5px;
+    margin-bottom: 5px;
+}
+
+li button {
+    float: right;
+    margin: 0 3px;
+}
+
+.checked {
+    text-decoration: line-through;
+}
+	</style>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="./js/simple_spa.js"></script>
+</head>
+<body>
+    <div id="createListDiv">
+        <h1>Simple Shopping List</h1>
+        <input type="text" id="shoppingListName" placeholder="New List" />
+        <button onclick="createShoppingList();">Create</button>
+    </div>
+
+    <div id="shoppingListDiv" style="display: none;">
+        <h1 id="shoppingListTitle">New List</h1>
+        <input type="text" id="newItemName" placeholder="New Item" />
+        <button onclick="addItem()">Add</button>
+        <ul id="shoppingListItems">
+            <li>Salad <button>C</button><button>D</button></li>
+            <li>Milk <button>C</button><button>D</button></li>
+            <li>Tomatoes <button>C</button><button>D</button></li>
+        </ul>
+    </div>
+</body>
+</html>
