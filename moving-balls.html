@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Ballroom</title>
+<style type="text/css">
+#xDiv {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 72px;
+  line-height: 100px;
+  font-family: Arial, sans-serif;
+  position: fixed;
+  border-radius: 50px;
+}
+
+.ball {
+  width: 100px;
+  height: 100px;
+  background-color: red;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 72px;
+  line-height: 100px;
+  font-family: Arial, sans-serif;
+  position: fixed;
+  border-radius: 50px;
+  border: solid 1px transparent;
+}
+
+.ball:active {
+	border-color: #FF0000;
+}
+
+.context-menu {
+    z-index:1000;
+    position: absolute;
+    background-color:#C0C0C0;
+    border: 1px solid black;
+    padding: 2px;
+	background-color: snow;
+	border-radius: 5px;
+}
+.context-menu a {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	border: solid 1px #777;
+	cursor: pointer;
+	padding: 4px;
+	text-align: center;
+	color: #777;
+}
+.context-menu a:hover {
+	color: #333;
+	text-decoration: underline;
+	background-color: whitesmoke;
+}
+</style>
+<!-- <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script> -->
+<script
+  src="https://code.jquery.com/jquery-2.2.4.min.js"
+  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+  crossorigin="anonymous"></script>
+<script>
+var $ball = null;
+var timer = null;
+
+var speed = 0;
+var maxw = 0;
+var maxh = 0;
+
+function calcBounds() {
+	maxw = $(window).width(); // - $('#xDiv').outerWidth();
+	maxh = $(window).height(); // - $('#xDiv').outerWidth();
+}
+
+function colorChanged(e) {
+	console.log("color changed:" , e.target.value);
+	//console.log(e.target.value);
+	////$ball.css("background-color", e.target.value);
+}
+
+function ballChanged(e) {
+	console.log(e);
+	var clr = $('#ddBalls option:selected').css('color');
+	console.log(clr);
+	console.log($('#ddBalls option:selected').css('background-color'));
+	$('#ddBalls').css('color', clr);
+	$ball = $('#ddBalls option:selected').val();
+}
+
+var ballsMenu = {
+	startLoop: function() {
+		console.log(maxw, maxh);
+		if (!bTimer) {
+			if (balls.length > 0)
+			{
+				bTimer = setInterval(loop, 24);
+			}
+		}
+		else 
+			alert('Timer already running.' + timer);
+	},
+	stopLoop: function() {
+		if (bTimer != null) {
+			clearInterval(bTimer);
+			bTimer = null;
+		}
+	},
+	changeSpeed: function(delta) {
+		speed += delta;
+		if (speed < 1) speed = 1;
+		if (speed > 100) speed = 100;
+		
+		$('#txtSpeed').text(speed);
+		if (speed === 1) this.setMenuItemEnabled('#itemSlower', false);
+		else this.setMenuItemEnabled('#itemSlower', true);;
+		if (speed === 100) this.setMenuItemEnabled('#itemFaster', false);
+		else this.setMenuItemEnabled('#itemFaster', true);
+	},
+	setMenuItemEnabled: function(itemId, enabled) {
+		if (enabled)
+			$(itemId).css('color', '#008800');
+		else 
+			$(itemId).css('color', '#cccccc');
+	}
+};
+
+var Ball = function(ballId, ballColor) {
+
+console.log(ballId, ballColor);
+
+	this.bid = ballId;
+	this.color = ballColor;
+	this.ball = $('<div id="' + ballId + '" class="ball">O</div>').css({'background-color': ballColor}).appendTo($('body'));
+
+	this.x = 1;
+	this.y = 1;
+	this.w = 100;
+	this.h = 100;
+	this.dx = 1;
+	this.dy = 1;
+	
+	this.timer = null;
+	this.runway = 1000;
+	
+
+	console.trace(this); //.bid, this.color);
+	console.log(this.x, this.y, this.dx, this.dy);
+	console.log(this.timer, this.runway);
+
+	//	var speed = 5;
+	
+	this.move = function() {
+		//console.log('move started: ', this.x, this.y);
+		
+		this.ball.css("left", this.x);
+		this.ball.css("top", this.y);
+	
+		this.x += this.dx * speed;
+		this.y += this.dy * speed;
+		if (this.x < 0 || this.x > maxw - this.w) {
+			this.dx *= -1;
+			if (this.x < 0) this.x = 0;
+			else if (this.x > maxw - this.w) this.x = maxw - this.w;
+		}
+		if (this.y < 0 || this.y > maxh - this.h) {
+			this.dy *= -1;
+			if (this.y < 0) this.y = 0;
+			else if (this.y > maxh - this.h) this.y = maxh - this.h;
+		}
+			
+		//this.runway -= speed;
+		//if (this.runway <= 0)
+		//	this.ball.hide();
+	};
+	
+	this.setColor = function(newColor) {
+		this.ball.css({'background-color' : newColor});
+	};
+	this.getTimer = function() {
+		return this.timer;
+	};
+	this.setTimer = function(newTimer) {
+		this.timer = newTimer;
+	};
+	
+	this.destroy = function() {
+		this.ball.animate({
+			width: "0",
+			height: "0"
+		}, 2000).remove();
+	};
+};
+
+var b = null;
+var balls = [];
+var bTimer = null;
+var loop = function() {
+	for (var bb in balls){
+		balls[bb].move();
+	}
+};
+function newBallCreation() {
+
+	if (!bTimer) {
+		bTimer = setInterval(loop, 24);
+	}
+
+	var idBase = 'ballDiv';
+	var genId = getNextId();
+	var ballId = idBase + genId;
+	b = new Ball(ballId, $("#ballColor").val());
+	b.setTimer(bTimer);
+	balls.push(b);
+	$("#ddBalls").append($("<option value='"+ ballId +"'>Ball #" + genId + "</option>").css('color', $('#ballColor').val()));
+}
+
+function destroyBall(){
+	let ballId = $("#ddBalls option:selected").val();
+	console.log("remove ball:", ballId);
+	let theBall = balls.find(x => x.bid === ballId);
+	console.log("the ball:");
+	console.info(theBall);
+	if (theBall == null) {
+		console.warn("The ball '#" + ballId + "' does not exist.");
+		return;
+	}
+	
+	if (balls.length > 0) {
+
+		theBall.setTimer(null);
+		theBall.destroy();
+		
+		balls.splice(balls.indexOf(theBall), 1);
+		
+		$("#ddBalls option:selected").remove();
+		
+		if (balls.length == 0 && bTimer != null)
+		{
+			clearInterval(bTimer);
+			bTimer = null;
+		}
+	}
+	else {
+		alert("You've got no balls!");
+	}
+}
+
+var getNextId = (function () {
+    var counter = 0;
+    return function () {return counter += 1;}
+})();
+
+$(function(){
+	calcBounds();
+
+	$("#btnStart").click(newBallCreation);
+	$("#btnStop").click(destroyBall);
+	
+	$(window).keypress(function(e) {
+		e.preventDefault();
+		console.log("Handler for .keypress() called. char code: " + e.charCode);
+		if (43 == e.charCode)
+			ballsMenu.changeSpeed(1);
+		if (45 == e.charCode)
+			ballsMenu.changeSpeed(-1)
+	});
+	$(window).resize(function() {
+		calcBounds();
+		if (x > maxw) x = maxw;
+		if (y > maxh) y = maxh;
+	});
+	
+	// context menu
+	$(document).bind("contextmenu", function(event) { 
+		event.preventDefault();
+		$("#ContextMenu").css({top: event.pageY + "px", left: event.pageX + "px", display: 'block'});
+	}).bind("click", function(event) {
+		$("#ContextMenu").hide();
+	});
+	$('#itemStart').click(function() {
+		ballsMenu.startLoop();
+	});
+	$('#itemStop').click(function() {
+		ballsMenu.stopLoop();
+	});
+	$('#itemFaster').click(function() {
+		ballsMenu.changeSpeed(1);
+	});
+	$('#itemSlower').click(function() {
+		ballsMenu.changeSpeed(-1);
+	});
+	
+	$("#ballColor").change(colorChanged);
+	$("#ddBalls").change(ballChanged);
+	ballsMenu.changeSpeed(5);
+});
+</script>
+</head>
+<body>
+<div style="border: solid 1px #777; border-radius: 5px; background: #eee; width: 300px; padding: 3px;">
+	<div>
+		Speed: <span id="txtSpeed"></span>
+	</div>
+	<div>
+		Color: <input type="color" id="ballColor" value="#FF0000" />
+		<button id="btnStart">Add ball</button>
+	</div>
+	<div>
+		Balls: <select id="ddBalls"></select>
+		<span id="ballStats"></span> 
+		<button id="btnStop">Remove ball</button> 
+	</div>
+</div>
+
+<script async>
+function myFunction() {
+    
+}
+</script>
+<script async>
+ //   setInterval(function(){ console.log("--- "); move('#yDiv'); }, 500);
+</script>
+
+<div id="ContextMenu" class='context-menu'>
+	<a id="itemStart">START</a>
+	<a id="itemStop">STOP</a>
+	<a id="itemFaster">Speed Up</a>
+	<a id="itemSlower">Slow Down</a>
+</div>
+
+</body>
+</html>
