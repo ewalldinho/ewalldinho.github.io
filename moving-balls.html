@@ -192,7 +192,8 @@ console.log(ballId, ballColor);
 	this.destroy = function() {
 		this.ball.animate({
 			width: "0",
-			height: "0"
+			height: "0",
+			fontSize: "0"
 		}, 2000).remove();
 	};
 };
@@ -236,7 +237,7 @@ function destroyBall(){
 		theBall.setTimer(null);
 		theBall.destroy();
 		
-		balls.splice(balls.indexOf(theBall), 1);
+		//balls.splice(balls.indexOf(theBall), 1);
 		
 		$("#ddBalls option:selected").remove();
 		
